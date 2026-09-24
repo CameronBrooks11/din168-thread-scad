@@ -21,6 +21,3 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
   on each flank and radially.
 - **Rendering:** the thread is one polyhedron swept along a true helix. The GL45 example renders in
   about 18 s on OpenSCAD 2021.01 and well under a second on the manifold backend.
-
-`gl_threads.scad` is the earlier slice-stacked version and `deckel.scad` a set of unthreaded cap
-blanks; both are superseded by `din168.scad`.
