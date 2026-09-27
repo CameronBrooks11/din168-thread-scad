@@ -1,8 +1,7 @@
 # References
 
-Every number the library takes from outside is recorded here with its source, so it can be checked
-against that source rather than against memory. A value in the code that is not in this file is a
-choice, not a citation.
+Every number the library takes from outside is recorded here with its source. A value in the code
+that is not in this file is a choice, not a citation.
 
 ## DIN 168-1:1998-04 (primary)
 
@@ -63,7 +62,7 @@ The standard designates a thread as `Gewinde DIN 168 – GL 25 × 3`: size and p
 ## Secondary tables
 
 Two web tables reproduce Tabelle 1. They were the library's source before the standard was read,
-and they agree with each other cell for cell, typos included, so they are one table, not two. Both
+and they agree with each other cell for cell, typos included. Both
 accessed 2026-09-24 and re-read from their HTML 2026-09-26:
 
 - gewinde-normen.de, _Knuckle Thread DIN 168_:

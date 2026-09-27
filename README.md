@@ -18,12 +18,12 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 - **Profile:** Bild 1 of the standard: flanks at 60° on the glass and 30° in the cap, crests rounded
   to R1 and roots to R2, the glass tooth `b = P·k` wide at its core. The standard gives no width for
   the cap tooth; it follows from the cap's crest radius and flank angle (see `din168.scad`).
-- **Fit:** the cap is cut at the loose end of its tolerance and the printed glass side (`din168_bolt`)
-  at the tight end, then each is shrunk by `clearance` (default 0.2 mm) on every face. Against the
-  largest glass the standard allows, the default cap leaves 0.28 mm (P = 2) to 0.70 mm (P = 5) at
-  the closest point.
-- **Rendering:** the thread is one polyhedron swept along a true helix. The GL45 example (a cap and a
-  gauge) took 89 s to render on OpenSCAD 2021.01 (CGAL); preview is quick.
+- **Fit:** the cap is cut to the largest cap the standard allows and the printed glass side
+  (`din168_bolt`) to the smallest glass, then each is shrunk by `clearance` (default 0.2 mm) on
+  every face. Centred on the largest glass the standard allows, the default cap leaves 0.28 mm
+  (P = 2) to 0.70 mm (P = 5) at the closest point.
+- **Rendering:** the thread is one polyhedron swept along a true helix. A full render of the GL45
+  example takes over a minute on OpenSCAD 2021.01; preview is quick.
 
 ## Sizes
 

@@ -1,4 +1,4 @@
-// A GL45 screw cap, plain, and a short GL45 gauge to try it on without a bottle.
+// A GL45 screw cap, ribbed, and a short GL45 gauge to try it on without a bottle.
 use <../din168.scad>
 
 gl = din168_by_name("GL45");
