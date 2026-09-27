@@ -12,25 +12,68 @@
  * in seconds on OpenSCAD 2021.01 as well as on the manifold backend.
  */
 
-// ----- size table (docs/references.md) -----
+// ----- size table (DIN 168-1:1998-04, Tabelle 1; docs/references.md) -----
 
-// [name, pitch, [bolt outer min, max], [bolt core min, max], [nut outer min, max], [nut core min, max]]
-// Bolt is the external thread on the glass; nut is the internal thread in the cap. mm.
-din168_gl25 = ["GL25", 3.0, [24.50, 25.00], [22.48, 22.98], [25.10, 25.40], [23.08, 23.38]];
-din168_gl28 = ["GL28", 3.0, [27.50, 28.00], [25.48, 25.98], [28.10, 28.40], [26.08, 26.38]];
-din168_gl32 = ["GL32", 4.0, [31.30, 32.00], [28.60, 29.30], [32.15, 32.55], [29.45, 29.85]];
-din168_gl45 = ["GL45", 4.0, [44.30, 45.00], [41.60, 42.30], [45.15, 45.55], [42.45, 42.85]];
+// [name, P, d, d1, D, D1, bolt allowance, nut allowance, R1, R2 max, k], as the standard gives them.
+// Bolt is the external thread on the glass (d, d1); nut is the internal thread in the cap (D, D1).
+// The bolt's diameters run from nominal down by its allowance, the nut's from nominal up. mm.
+din168_gl8 = ["GL8", 2.0, 8, 6.6, 8.1, 6.7, 0.35, 0.2, 0.51, 0.3, 0.7];
+din168_gl10 = ["GL10", 2.0, 10, 8.6, 10.1, 8.7, 0.35, 0.2, 0.51, 0.3, 0.7];
+din168_gl12 = ["GL12", 2.0, 12, 10.6, 12.1, 10.7, 0.35, 0.2, 0.51, 0.3, 0.7];
+din168_gl14 = ["GL14", 2.5, 14, 12.32, 14.1, 12.42, 0.4, 0.25, 0.62, 0.4, 0.675];
+din168_gl16 = ["GL16", 2.5, 16, 14.32, 16.1, 14.42, 0.4, 0.25, 0.62, 0.4, 0.675];
+din168_gl18 = ["GL18", 3.0, 18, 15.98, 18.1, 16.08, 0.5, 0.3, 0.74, 0.5, 0.675];
+din168_gl20 = ["GL20", 3.0, 20, 17.98, 20.1, 18.08, 0.5, 0.3, 0.74, 0.5, 0.675];
+din168_gl22 = ["GL22", 3.0, 22, 19.98, 22.1, 20.08, 0.5, 0.3, 0.74, 0.5, 0.675];
+din168_gl25 = ["GL25", 3.0, 25, 22.98, 25.1, 23.08, 0.5, 0.3, 0.74, 0.5, 0.675];
+din168_gl25x3_5 = ["GL25", 3.5, 25, 22.64, 25.1, 22.74, 0.5, 0.3, 0.86, 0.5, 0.675];
+din168_gl28 = ["GL28", 3.0, 28, 25.98, 28.1, 26.08, 0.5, 0.3, 0.74, 0.5, 0.675];
+din168_gl32 = ["GL32", 4.0, 32, 29.30, 32.15, 29.45, 0.7, 0.4, 0.99, 0.6, 0.675];
+din168_gl36 = ["GL36", 4.0, 36, 33.30, 36.15, 33.45, 0.7, 0.4, 0.99, 0.6, 0.675];
+din168_gl40 = ["GL40", 4.0, 40, 37.30, 40.15, 37.45, 0.7, 0.4, 0.99, 0.6, 0.675];
+din168_gl45 = ["GL45", 4.0, 45, 42.30, 45.15, 42.45, 0.7, 0.4, 0.99, 0.6, 0.675];
+din168_gl50 = ["GL50", 4.0, 50, 47.30, 50.3, 47.6, 0.8, 0.5, 0.99, 0.6, 0.675];
+din168_gl56 = ["GL56", 4.0, 56, 53.30, 56.3, 53.6, 0.8, 0.5, 0.99, 0.6, 0.675];
+din168_gl63 = ["GL63", 5.0, 63, 60, 63.4, 60.4, 1.0, 0.6, 1.1, 0.8, 0.6];
+din168_gl70 = ["GL70", 5.0, 70, 67, 70.4, 67.4, 1.0, 0.6, 1.1, 0.8, 0.6];
+din168_gl80 = ["GL80", 5.0, 80, 77, 80.4, 77.4, 1.0, 0.6, 1.1, 0.8, 0.6];
+din168_gl90 = ["GL90", 5.0, 90, 87, 90.4, 87.4, 1.0, 0.6, 1.1, 0.8, 0.6];
+din168_gl100 = ["GL100", 5.0, 100, 97, 100.4, 97.4, 1.2, 0.6, 1.1, 0.8, 0.6];
+din168_gl112 = ["GL112", 5.0, 112, 109, 112.4, 109.4, 1.2, 0.6, 1.1, 0.8, 0.6];
+din168_gl125 = ["GL125", 5.0, 125, 122, 125.4, 122.4, 1.2, 0.6, 1.1, 0.8, 0.6];
 
-din168_sizes = [din168_gl25, din168_gl28, din168_gl32, din168_gl45];
+// In the standard's order, so the first GL25 is P = 3.
+din168_sizes = [
+  din168_gl8, din168_gl10, din168_gl12, din168_gl14, din168_gl16, din168_gl18, din168_gl20,
+  din168_gl22, din168_gl25, din168_gl25x3_5, din168_gl28, din168_gl32, din168_gl36, din168_gl40,
+  din168_gl45, din168_gl50, din168_gl56, din168_gl63, din168_gl70, din168_gl80, din168_gl90,
+  din168_gl100, din168_gl112, din168_gl125,
+];
 
-function din168_by_name(name) = [for (s = din168_sizes) if (s[0] == name) s][0];
+// A size by name, e.g. "GL45". GL25 comes in two pitches: pitch=3.5 picks the other one.
+function din168_by_name(name, pitch = undef) =
+  let (
+    found = [for (s = din168_sizes) if (s[0] == name && (is_undef(pitch) || s[1] == pitch)) s]
+  ) assert(len(found) > 0, str("din168_by_name: no DIN 168 size ", name, is_undef(pitch) ? "" : str(" x ", pitch)))
+  found[0];
 
 function din168_name(size) = size[0];
 function din168_pitch(size) = size[1];
-function din168_bolt_outer(size) = size[2]; // [min, max]
-function din168_bolt_core(size) = size[3];
-function din168_nut_outer(size) = size[4];
-function din168_nut_core(size) = size[5];
+function din168_bolt_outer(size) = [size[2] - size[6], size[2]]; // d, [min, max]
+function din168_bolt_core(size) = [size[3] - size[6], size[3]]; // d1
+function din168_nut_outer(size) = [size[4], size[4] + size[7]]; // D
+function din168_nut_core(size) = [size[5], size[5] + size[7]]; // D1
+function din168_r1(size) = size[8]; // crest radius, both parts
+function din168_r2(size) = size[9]; // root radius, maximum
+function din168_k(size) = size[10];
+
+// Profile width b and depth c (Bild 1): the glass tooth is b wide at the core, c high.
+function din168_profile_width(size) = din168_pitch(size) * din168_k(size);
+function din168_profile_depth(size) = din168_profile_width(size) / 2;
+
+// Flank diameter d2 of the largest in-tolerance glass (Bild 1).
+function din168_flank_diameter(size) =
+  size[2] - din168_pitch(size) * (sqrt(3) / 2 + din168_k(size) * (1 - sqrt(3)));
 
 // ----- profile -----
 

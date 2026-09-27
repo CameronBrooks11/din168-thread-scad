@@ -12,8 +12,9 @@ din168_nut(gl, length=12);            // the cap's thread alone, as a tube
 din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 ```
 
-- **Sizes:** GL25, GL28, GL32, GL45. Every figure in the table is recorded with its source in
-  [docs/references.md](docs/references.md).
+- **Sizes:** every size in DIN 168-1:1998-04, GL8 to GL125, including GL25 in both its pitches
+  (`din168_by_name("GL25", pitch=3.5)` for the second). Every figure in the table is recorded with
+  its source in [docs/references.md](docs/references.md).
 - **Profile:** flanks at 60° on the glass and 30° in the cap, as the sources give. No source gives
   tooth widths or crest and root radii, so the profile is a trapezoid and the widths are a stated
   choice (see `din168.scad`).
@@ -22,5 +23,4 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 - **Rendering:** the thread is one polyhedron swept along a true helix. The GL45 example renders in
   about 18 s on OpenSCAD 2021.01 and well under a second on the manifold backend.
 
-Planned: examples for the other registered sizes beside the GL45 one, and more GL sizes from the
-tables `docs/references.md` cites.
+Planned: examples for the other sizes beside the GL45 one.
