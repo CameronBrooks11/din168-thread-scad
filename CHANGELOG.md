@@ -9,8 +9,7 @@ All notable changes to this project are recorded here. The format follows
 
 - Every size in DIN 168-1:1998-04: GL8 to GL125, 24 in all, including GL25 × 3.5.
 - `din168_by_name(name, pitch)`: the optional `pitch` picks GL25 × 3.5.
-- `din168_r1`, `din168_r2`, `din168_k`, `din168_profile_width`, `din168_profile_depth` and
-  `din168_flank_diameter`, from the standard.
+- `din168_r1` and `din168_r2`: the standard's crest and root radii.
 - `examples/gl80_cap.scad` and `examples/all_sizes.scad`.
 
 ### Changed
@@ -21,11 +20,17 @@ All notable changes to this project are recorded here. The format follows
   face.
 - The size table is now DIN 168-1 itself, not the web tables it was built from. Three of their cells
   were wrong: GL56 bolt core min, GL100 bolt outer min and GL112 bolt core min.
+- A size row holds the standard's own form, `[name, P, d, d1, D, D1, bolt allowance, nut allowance,
+  R1, R2, k]`, in place of `[min, max]` pairs. Read it through the accessors, which return what they
+  did.
 - `din168_nut_profile` and `din168_bolt_profile` return `[tip r, root r, tooth]`; the last two
   elements were a trapezoid's half-widths. `din168_helix` takes the new form.
 - `din168_by_name` asserts on a name it does not know, instead of returning `undef`.
-- The cap's mouth is bevelled 0.5 mm outside the thread's root (`din168_mouth_bevel`) before its
-  45° lead-in to the crest.
+- The mouth's 45° lead-in starts 0.5 mm outside the thread's root (`din168_mouth_bevel`).
+
+### Removed
+
+- `din168_bolt_tooth_width`, which measured the old trapezoid.
 
 ### Fixed
 

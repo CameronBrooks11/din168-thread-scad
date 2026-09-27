@@ -5,11 +5,9 @@
  * `use <din168-thread-scad/din168.scad>`. Draws nothing at top level; see examples/.
  *
  * Every dimension in the table below, and the profile, is from DIN 168-1:1998-04 as recorded in
- * docs/references.md. Anything else - the cap tooth's width, the clearances, the cap
- * proportions - is a choice, and is named as one where it is made.
+ * docs/references.md. Anything else is marked CHOICE where it is made.
  *
- * The thread is swept as one polyhedron along a true helix, then trimmed to length, so it renders
- * in seconds on OpenSCAD 2021.01 as well as on the manifold backend.
+ * The thread is swept as one polyhedron along a true helix, then trimmed to length.
  */
 
 // ----- size table (DIN 168-1:1998-04, Tabelle 1; docs/references.md) -----
@@ -65,15 +63,6 @@ function din168_nut_outer(size) = [size[4], size[4] + size[7]]; // D
 function din168_nut_core(size) = [size[5], size[5] + size[7]]; // D1
 function din168_r1(size) = size[8]; // crest radius, both parts
 function din168_r2(size) = size[9]; // root radius, maximum
-function din168_k(size) = size[10];
-
-// Profile width b and depth c (Bild 1): the glass tooth is b wide at the core, c high.
-function din168_profile_width(size) = din168_pitch(size) * din168_k(size);
-function din168_profile_depth(size) = din168_profile_width(size) / 2;
-
-// Flank diameter d2 of the largest in-tolerance glass (Bild 1).
-function din168_flank_diameter(size) =
-  size[2] - din168_pitch(size) * (sqrt(3) / 2 + din168_k(size) * (1 - sqrt(3)));
 
 // ----- profile -----
 
@@ -85,7 +74,7 @@ din168_nut_flank_angle = 30;
 // to both flanks and its top is the tooth's tip, so the flanks' width follows. On the glass that
 // width is b = P*k at the core line, as the standard draws it. The cap tooth is built the same way
 // from its own angle; the standard gives no width for it, and this is the width that follows.
-// Both roots are rounded to R2, the standard's maximum.
+// Both roots are rounded to R2. CHOICE: the standard's maximum.
 //
 // A tooth is [height, half flank angle, crest radius, root radius]. h is measured from the tooth's
 // root line toward its tip, z along the axis from its centreline.
@@ -96,14 +85,6 @@ function din168_tooth_w0(t) = (t[0] + t[2] / sin(t[1]) - t[2]) * tan(t[1]);
 // Where the root radius meets the root line.
 function din168_tooth_zf(t) = din168_tooth_w0(t) - t[3] * tan(t[1]) + t[3] / cos(t[1]);
 
-// Half-width of the tooth at height h, 0 <= h <= height.
-function din168_tooth_half_width(t, h) =
-  let (
-    a = t[1], rc = t[2], rf = t[3], hc = t[0] - rc
-  ) h < rf * (1 - sin(a)) ? din168_tooth_zf(t) - sqrt(max(0, rf * rf - (rf - h) * (rf - h)))
-  : h < hc + rc * sin(a) ? din168_tooth_w0(t) - h * tan(a)
-  : sqrt(max(0, rc * rc - (h - hc) * (h - hc)));
-
 // The tooth's outline in (h, z), from the root line at +z over the tip to the root line at -z.
 // Segments per arc: the crest's and the root's.
 function din168_tooth_outline(t, n_crest, n_root) =
@@ -113,26 +94,11 @@ function din168_tooth_outline(t, n_crest, n_root) =
     crest = [for (i = [0:n_crest]) let (p = (90 - a) * (1 - 2 * i / n_crest)) [hc + rc * cos(p), rc * sin(p)]]
   ) concat(root, crest, [for (i = [n_root:-1:0]) [root[i][0], -root[i][1]]]);
 
-// The standard's glass and cap teeth, each shrunk by the clearance on every face: an offset of the
-// outline moves the root and tip lines by the clearance, and changes the radii by it.
-function din168_bolt_tooth(size, clearance = 0) =
-  [
-    (din168_bolt_outer(size)[1] - din168_bolt_core(size)[1]) / 2,
-    din168_bolt_flank_angle / 2,
-    din168_r1(size) - clearance,
-    din168_r2(size) + clearance,
-  ];
-function din168_nut_tooth(size, clearance = 0) =
-  [
-    (din168_nut_outer(size)[0] - din168_nut_core(size)[0]) / 2,
-    din168_nut_flank_angle / 2,
-    din168_r1(size) - clearance,
-    din168_r2(size) + clearance,
-  ];
-
-// Width of the glass tooth at radius r, for the largest in-tolerance glass.
-function din168_bolt_tooth_width(size, r) =
-  2 * din168_tooth_half_width(din168_bolt_tooth(size), r - din168_bolt_core(size)[1] / 2);
+// The standard's tooth for a flank angle, shrunk by the clearance on every face: an offset of the
+// outline moves the root and tip lines by the clearance, and changes the radii by it. Glass and cap
+// teeth are the same height, since the standard makes D - D1 equal d - d1.
+function din168_tooth(size, flank_angle, clearance) =
+  [(size[2] - size[3]) / 2, flank_angle / 2, din168_r1(size) - clearance, din168_r2(size) + clearance];
 
 // A thread to cut: [tip r, root r, tooth]. The nut is cut at the loose end of its tolerance, the
 // largest D and D1, and opened by the clearance, so it clears the largest in-tolerance glass.
@@ -140,7 +106,7 @@ function din168_nut_profile(size, clearance) =
   [
     din168_nut_core(size)[1] / 2 + clearance,
     din168_nut_outer(size)[1] / 2 + clearance,
-    din168_nut_tooth(size, clearance),
+    din168_tooth(size, din168_nut_flank_angle, clearance),
   ];
 
 // The mirror of the nut: cut at the smallest in-tolerance glass, shrunk by the clearance, for a
@@ -149,12 +115,12 @@ function din168_bolt_profile(size, clearance) =
   [
     din168_bolt_outer(size)[0] / 2 - clearance,
     din168_bolt_core(size)[0] / 2 - clearance,
-    din168_bolt_tooth(size, clearance),
+    din168_tooth(size, din168_bolt_flank_angle, clearance),
   ];
 
 // ----- helix -----
 
-// How far a tooth runs on into the wall it stands on, so the two overlap instead of touching.
+// How far a tooth runs on into the wall it stands on, so the two overlap instead of touching. CHOICE.
 din168_root_overlap = 0.3;
 
 // Steps per turn of the helix.
@@ -163,8 +129,8 @@ function din168_steps_per_turn() = $preview ? 60 : 180;
 // The thread's root between turns is a cylinder, faceted like the helix. A polygon at the root radius
 // would come in between its corners and fill the groove (0.13 mm on GL45 at the default $fa), so the
 // cap's bore circumscribes the root and the glass's core inscribes it: both err toward clearance.
-// Both stand off the root by din168_root_gap, and turn half a step so their corners fall between the
-// helix's steps: where the two meet edge to edge or face to face they leave non-manifold edges.
+// Both stand off the root by din168_root_gap (CHOICE) and turn half a step from the helix's steps:
+// corners lined up with the helix's left non-manifold edges.
 din168_root_gap = 0.02;
 module din168_root_cylinder(h, r, outside) {
   _n = din168_steps_per_turn();
@@ -178,10 +144,6 @@ din168_mouth_bevel = 0.5;
 // Segments in the crest arc and in each root arc of the tooth's section.
 function din168_crest_segments() = $preview ? 4 : 6;
 function din168_root_segments() = $preview ? 2 : 3;
-
-// Twice the signed area of a polygon, positive when it winds anticlockwise.
-function din168_area2(p) =
-  [for (i = [0:len(p) - 1]) let (q = p[(i + 1) % len(p)]) p[i][0] * q[1] - q[0] * p[i][1]] * [for (i = [0:len(p) - 1]) 1];
 
 /**
  * One tooth swept along a helix: `turns` turns from z = 0, rising by the pitch per turn.
@@ -206,8 +168,9 @@ module din168_helix(pitch, profile, turns) {
     [[_rr - _s * din168_root_overlap, -_zf]]
   );
 
-  // Section in (r, z), wound anticlockwise whichever side the root is on, so the faces below face out.
-  _sec = din168_area2(_sec0) > 0 ? _sec0 : [for (i = [len(_sec0) - 1:-1:0]) _sec0[i]];
+  // Section in (r, z), wound anticlockwise so the faces below face out: the nut's (tip inside the
+  // root) already is, the bolt's is reversed.
+  _sec = _s < 0 ? _sec0 : [for (i = [len(_sec0) - 1:-1:0]) _sec0[i]];
   _m = len(_sec);
   _n = ceil(turns * din168_steps_per_turn());
 
@@ -240,7 +203,6 @@ module din168_nut(size, length, wall = 2, clearance = 0.2) {
   _prof = din168_nut_profile(size, clearance);
   _r_out = _prof[1] + wall;
 
-  assert(_prof[2][2] > 0, str("din168_nut: a clearance of ", clearance, " leaves the tooth no crest radius"));
 
   difference() {
     union() {
@@ -271,7 +233,6 @@ module din168_bolt(size, length, bore = 0, clearance = 0.2) {
   _p = din168_pitch(size);
   _prof = din168_bolt_profile(size, clearance);
 
-  assert(_prof[2][2] > 0, str("din168_bolt: a clearance of ", clearance, " leaves the tooth no crest radius"));
   assert(bore / 2 < _prof[1] - 1, str("din168_bolt: a ", bore, " bore leaves under 1 mm under the thread"));
 
   difference() {
