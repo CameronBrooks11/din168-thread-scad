@@ -25,4 +25,30 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 - **Rendering:** the thread is one polyhedron swept along a true helix. The GL45 example (a cap and a
   gauge) took 89 s to render on OpenSCAD 2021.01 (CGAL); preview is quick.
 
-Planned: examples for the other sizes beside the GL45 one.
+## Sizes
+
+`din168_by_name("GL45")` returns a size; `din168_sizes` lists them all, in the standard's order.
+Diameters are nominal, in mm; the full table with allowances and radii is in
+[docs/references.md](docs/references.md).
+
+| Size  | P   | d (glass) | D (cap) |     | Size   | P   | d (glass) | D (cap) |
+| ----- | --- | --------- | ------- | --- | ------ | --- | --------- | ------- |
+| GL8   | 2   | 8         | 8.1     |     | GL32   | 4   | 32        | 32.15   |
+| GL10  | 2   | 10        | 10.1    |     | GL36   | 4   | 36        | 36.15   |
+| GL12  | 2   | 12        | 12.1    |     | GL40   | 4   | 40        | 40.15   |
+| GL14  | 2.5 | 14        | 14.1    |     | GL45   | 4   | 45        | 45.15   |
+| GL16  | 2.5 | 16        | 16.1    |     | GL50   | 4   | 50        | 50.3    |
+| GL18  | 3   | 18        | 18.1    |     | GL56   | 4   | 56        | 56.3    |
+| GL20  | 3   | 20        | 20.1    |     | GL63   | 5   | 63        | 63.4    |
+| GL22  | 3   | 22        | 22.1    |     | GL70   | 5   | 70        | 70.4    |
+| GL25  | 3   | 25        | 25.1    |     | GL80   | 5   | 80        | 80.4    |
+| GL25  | 3.5 | 25        | 25.1    |     | GL90   | 5   | 90        | 90.4    |
+| GL28  | 3   | 28        | 28.1    |     | GL100  | 5   | 100       | 100.4   |
+|       |     |           |         |     | GL112  | 5   | 112       | 112.4   |
+|       |     |           |         |     | GL125  | 5   | 125       | 125.4   |
+
+## Examples
+
+- [examples/gl45_cap.scad](examples/gl45_cap.scad): a GL45 cap and a short gauge to try it on.
+- [examples/gl80_cap.scad](examples/gl80_cap.scad): the same for GL80, ribbed.
+- [examples/all_sizes.scad](examples/all_sizes.scad): a cap in every size, labelled.
