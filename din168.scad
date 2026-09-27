@@ -120,6 +120,21 @@ din168_root_overlap = 0.3;
 // Steps per turn of the helix.
 function din168_steps_per_turn() = $preview ? 60 : 180;
 
+// The thread's root between turns is a cylinder, faceted like the helix. A polygon at the root radius
+// would come in between its corners and fill the groove (0.13 mm on GL45 at the default $fa), so the
+// cap's bore circumscribes the root and the glass's core inscribes it: both err toward clearance.
+// Both stand off the root by din168_root_gap, and turn half a step so their corners fall between the
+// helix's steps: where the two meet edge to edge or face to face they leave non-manifold edges.
+din168_root_gap = 0.02;
+module din168_root_cylinder(h, r, outside) {
+  _n = din168_steps_per_turn();
+  rotate([0, 0, 180 / _n])
+    cylinder(h=h, r=outside ? (r + din168_root_gap) / cos(180 / _n) : r - din168_root_gap, $fn=_n);
+}
+
+// How far the cap's mouth is bevelled outside the thread's root, so the glass finds it. CHOICE.
+din168_mouth_bevel = 0.5;
+
 /**
  * One tooth swept along a helix: `turns` turns from z = 0, rising by the pitch per turn.
  * profile is [crest r, root r, crest half-width, root half-width]; the root is extended by
@@ -174,15 +189,20 @@ module din168_nut(size, length, wall = 2, clearance = 0.2) {
     union() {
       difference() {
         cylinder(h=length, r=_r_out);
-        translate([0, 0, -1]) cylinder(h=length + 2, r=_prof[1]);
+        translate([0, 0, -1]) din168_root_cylinder(length + 2, _prof[1], outside=true);
       }
       intersection() {
         translate([0, 0, -_p]) din168_helix(_p, _prof, (length + 2 * _p) / _p);
         cylinder(h=length, r=_r_out);
       }
     }
-    // 45 degree lead-in from the root down to the crest
-    translate([0, 0, -0.01]) cylinder(h=_prof[1] - _prof[0] + 0.01, r1=_prof[1], r2=_prof[0]);
+    // 45 degree lead-in: a bevel on the mouth's inner edge, din168_mouth_bevel wide, down past the
+    // crest. It starts a millimetre outside the part and ends inside the bore, so it crosses every
+    // face it cuts rather than meeting one at an edge, and it is faceted like the root cylinder.
+    _n = din168_steps_per_turn();
+    _r0 = _prof[1] + din168_mouth_bevel + 1;
+    _r1 = _prof[0] - 0.1;
+    translate([0, 0, -1]) rotate([0, 0, 180 / _n]) cylinder(h=_r0 - _r1, r1=_r0, r2=_r1, $fn=_n);
   }
 }
 
@@ -199,10 +219,11 @@ module din168_bolt(size, length, bore = 0, clearance = 0.2) {
 
   difference() {
     union() {
-      cylinder(h=length, r=_prof[1]);
+      din168_root_cylinder(length, _prof[1], outside=false);
       intersection() {
         translate([0, 0, -_p]) din168_helix(_p, _prof, (length + 2 * _p) / _p);
-        cylinder(h=length, r=_prof[0]);
+        // Past the crest: this only trims the ends, and a faceted cylinder at the crest would cut it
+        cylinder(h=length, r=_prof[0] + 1);
       }
     }
     if (bore > 0) translate([0, 0, -1]) cylinder(h=length + 2, d=bore);
@@ -236,7 +257,7 @@ module din168_cap(
   translate([0, 0, thread_length - 0.01])
     difference() {
       cylinder(h=liner_space + top + 0.01, r=_r_out);
-      translate([0, 0, -1]) cylinder(h=liner_space + 1.01, r=_prof[1]);
+      translate([0, 0, -1]) din168_root_cylinder(liner_space + 1.01, _prof[1], outside=true);
     }
 
   // Half-round ribs for grip
