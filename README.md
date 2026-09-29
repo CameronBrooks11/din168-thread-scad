@@ -8,6 +8,7 @@ use <din168-thread-scad/din168.scad>
 
 gl = din168_by_name("GL45");
 din168_cap(gl, ribs=36);              // a cap, mouth at z = 0
+din168_cap(gl, skirt=true);           // with a skirt below the thread; or skirt=<mm>
 din168_nut(gl, length=12);            // the cap's thread alone, as a tube
 din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 ```
@@ -22,6 +23,11 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
   (`din168_bolt`) to the smallest glass, then each is shrunk by `clearance` (default 0.2 mm) on
   every face. Centred on the largest glass the standard allows, the default cap leaves 0.28 mm
   (P = 2) to 0.70 mm (P = 5) at the closest point.
+- **Cap height:** no standard sets it. DIN 168-1 gives only the thread, and ISO 4796-1 leaves the
+  bottle's neck to the maker. The default cap is 17 mm: 12 mm of thread, 2 mm over the rim for a
+  liner, a 3 mm top. Shop-bought caps are taller and carry a skirt, plain wall below the thread
+  that covers the neck. `skirt=true` adds one pitch of it (4 mm on GL45), a choice;
+  `skirt=<mm>` sets your own. `din168_cap_height` gives the total.
 - **Rendering:** the thread is one polyhedron swept along a true helix. A full render of the GL45
   example takes over a minute on OpenSCAD 2021.01; preview is quick.
 
