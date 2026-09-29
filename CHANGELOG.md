@@ -12,7 +12,7 @@ All notable changes to this project are recorded here. The format follows
 - `din168_r1` and `din168_r2`: the standard's crest and root radii.
 - `examples/gl80_cap.scad` and `examples/all_sizes.scad`.
 - `din168_cap(skirt)`: plain wall below the thread. `false` (default) for none, `true` for one
-  pitch, or a length in mm. `din168_cap_height` gives a cap's overall height.
+  pitch, or a length in mm.
 
 ### Changed
 
@@ -29,6 +29,10 @@ All notable changes to this project are recorded here. The format follows
   elements were a trapezoid's half-widths. `din168_helix` takes the new form.
 - `din168_by_name` asserts on a name it does not know, instead of returning `undef`.
 - The mouth's 45° lead-in starts 0.5 mm outside the thread's root (`din168_mouth_bevel`).
+- `din168_cap` puts z = 0 at the seal plane, where the glass's rim meets the inside of the top,
+  not at the mouth. A cap translated to a bottle's rim height sits on it whatever its thread
+  length, liner space or skirt. Callers that placed a cap by its mouth move it up by
+  `thread_length + liner_space` plus any skirt.
 
 ### Removed
 

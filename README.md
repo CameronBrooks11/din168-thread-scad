@@ -7,7 +7,7 @@ internal and external thread, and a screw cap.
 use <din168-thread-scad/din168.scad>
 
 gl = din168_by_name("GL45");
-din168_cap(gl, ribs=36);              // a cap, mouth at z = 0
+din168_cap(gl, ribs=36);              // a cap, seated at z = 0: place it at the rim
 din168_cap(gl, skirt=true);           // with a skirt below the thread; or skirt=<mm>
 din168_nut(gl, length=12);            // the cap's thread alone, as a tube
 din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
@@ -27,7 +27,10 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
   bottle's neck to the maker. The default cap is 17 mm: 12 mm of thread, 2 mm over the rim for a
   liner, a 3 mm top. Shop-bought caps are taller and carry a skirt, plain wall below the thread
   that covers the neck. `skirt=true` adds one pitch of it (4 mm on GL45), a choice;
-  `skirt=<mm>` sets your own. `din168_cap_height` gives the total.
+  `skirt=<mm>` sets your own.
+- **Placing a cap:** z = 0 is the seal plane, where the glass's rim meets the inside of the top.
+  Translate a cap to a bottle's rim height and it sits on the rim, whatever its thread length,
+  liner space or skirt. The top runs from z = 0 to z = `top`.
 - **Rendering:** the thread is one polyhedron swept along a true helix. A full render of the GL45
   example takes over a minute on OpenSCAD 2021.01; preview is quick.
 

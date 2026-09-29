@@ -249,9 +249,10 @@ module din168_bolt(size, length, bore = 0, clearance = 0.2) {
 }
 
 /**
- * A screw cap: the nut, closed by a top. z = 0 is the mouth; the inside of the top, where the
- * glass's rim seals against a liner, is at z = skirt + thread_length + liner_space. The outside is
- * plain, or ribbed for grip.
+ * A screw cap: the nut, closed by a top. z = 0 is the seal plane, where the glass's rim meets the
+ * inside of the top, so a cap placed at a bottle's rim height sits on it whatever its arguments.
+ * The top is above it, from z = 0 to z = top; the liner space, thread and skirt hang below. The
+ * outside is plain, or ribbed for grip.
  *
  * skirt is plain wall below the thread, reaching down the neck as a shop-bought cap does: false for
  * none, true for din168_default_skirt, or a length in mm. Its bore clears the glass's thread.
@@ -274,29 +275,31 @@ module din168_cap(
   _s = din168_skirt_length(size, skirt);
   _h_in = _s + thread_length + liner_space;
 
-  if (_s > 0)
-    difference() {
-      cylinder(h=_s + 0.01, r=_r_out);
-      translate([0, 0, -1]) din168_root_cylinder(_s + 1.02, _prof[1], outside=true);
+  translate([0, 0, -_h_in]) {
+    if (_s > 0)
+      difference() {
+        cylinder(h=_s + 0.01, r=_r_out);
+        translate([0, 0, -1]) din168_root_cylinder(_s + 1.02, _prof[1], outside=true);
+      }
+
+    translate([0, 0, _s]) {
+      din168_nut(size, thread_length, wall, clearance);
+
+      // Plain wall over the liner space, then the top
+      translate([0, 0, thread_length - 0.01])
+        difference() {
+          cylinder(h=liner_space + top + 0.01, r=_r_out);
+          translate([0, 0, -1]) din168_root_cylinder(liner_space + 1.01, _prof[1], outside=true);
+        }
     }
 
-  translate([0, 0, _s]) {
-    din168_nut(size, thread_length, wall, clearance);
-
-    // Plain wall over the liner space, then the top
-    translate([0, 0, thread_length - 0.01])
-      difference() {
-        cylinder(h=liner_space + top + 0.01, r=_r_out);
-        translate([0, 0, -1]) din168_root_cylinder(liner_space + 1.01, _prof[1], outside=true);
-      }
+    // Half-round ribs for grip
+    if (ribs > 0)
+      for (i = [0:ribs - 1])
+        rotate([0, 0, i * 360 / ribs])
+          translate([_r_out, 0, 0])
+            cylinder(h=_h_in + top, r=wall / 2, $fn=8);
   }
-
-  // Half-round ribs for grip
-  if (ribs > 0)
-    for (i = [0:ribs - 1])
-      rotate([0, 0, i * 360 / ribs])
-        translate([_r_out, 0, 0])
-          cylinder(h=_h_in + top, r=wall / 2, $fn=8);
 }
 
 // What skirt = true gives: one pitch. CHOICE: no standard gives the neck's length below the
@@ -310,10 +313,6 @@ function din168_skirt_length(size, skirt) =
   : skirt == false ? 0
   : assert(is_num(skirt) && skirt >= 0, str("din168_cap: skirt must be true, false or a length >= 0, not ", skirt))
     skirt;
-
-// A cap's overall height, mouth to top, for the same arguments as din168_cap.
-function din168_cap_height(size, thread_length = 12, liner_space = 2, top = 3, skirt = false) =
-  din168_skirt_length(size, skirt) + thread_length + liner_space + top;
 
 // Outside radius of a cap, so a caller can size what it puts on the top.
 function din168_cap_radius(size, wall = 2, clearance = 0.2) = din168_nut_profile(size, clearance)[1] + wall;
