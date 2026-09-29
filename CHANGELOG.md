@@ -11,6 +11,8 @@ All notable changes to this project are recorded here. The format follows
 - `din168_by_name(name, pitch)`: the optional `pitch` picks GL25 × 3.5.
 - `din168_r1` and `din168_r2`: the standard's crest and root radii.
 - `examples/gl80_cap.scad` and `examples/all_sizes.scad`.
+- `din168_cap(skirt)`: plain wall below the thread. `false` (default) for none, `true` for one
+  pitch, or a length in mm. `din168_cap_height` gives a cap's overall height.
 
 ### Changed
 
