@@ -1,0 +1,29 @@
+# Build artifacts
+build/
+output/
+
+# Working / temporary files
+working/
+temp/
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python cache, if any tooling/scripts use Python
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+
+# output artifacts 
+*.stl
+*.obj
+*.3mf
+*.step
+*.stp
+*.iges
+*.igs
