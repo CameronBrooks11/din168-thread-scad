@@ -11,8 +11,12 @@ All notable changes to this project are recorded here. The format follows
 - `din168_by_name(name, pitch)`: the optional `pitch` picks GL25 × 3.5.
 - `din168_r1` and `din168_r2`: the standard's crest and root radii.
 - `examples/gl80_cap.scad` and `examples/all_sizes.scad`.
-- `din168_cap(skirt)`: plain wall below the thread. `false` (default) for none, `true` for one
-  pitch, or a length in mm.
+- GLS 80, DURAN's wide-mouth thread, as `din168_by_name("GLS80")`: GL80's profile and diameters
+  with three starts. It is not a DIN 168 thread. A size row may carry a twelfth field, its number
+  of starts; `din168_starts` and `din168_lead` read it, and `din168_helix` takes `starts`.
+- `din168_cap(ring_band)`: a band at the mouth, bored 2 mm outside the thread's root, to clear a
+  pouring ring.
+- `examples/gls80_cap.scad`.
 
 ### Changed
 
@@ -31,8 +35,11 @@ All notable changes to this project are recorded here. The format follows
 - The mouth's 45° lead-in starts 0.5 mm outside the thread's root (`din168_mouth_bevel`).
 - `din168_cap` puts z = 0 at the seal plane, where the glass's rim meets the inside of the top,
   not at the mouth. A cap translated to a bottle's rim height sits on it whatever its thread
-  length, liner space or skirt. Callers that placed a cap by its mouth move it up by
-  `thread_length + liner_space` plus any skirt.
+  length, liner space or ring band. Callers that placed a cap by its mouth move it up by
+  `thread_length + liner_space` plus any ring band.
+- A cap's thread defaults to five pitches (`din168_default_thread_length`), not 12 mm, and runs to
+  the mouth: 20 mm on GL45, 25 mm on GL80. With 12 mm the GL45 cap was 17 mm tall; DURAN's GL45
+  caps are 25 and 28 mm.
 
 ### Removed
 

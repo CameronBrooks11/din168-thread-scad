@@ -1,14 +1,14 @@
 # din168-thread-scad
 
 DIN 168 round threads (the GL threads on laboratory glassware) in OpenSCAD: a size table, the
-internal and external thread, and a screw cap.
+internal and external thread, and a screw cap. Also DURAN's GLS 80, which is not DIN 168.
 
 ```openscad
 use <din168-thread-scad/din168.scad>
 
 gl = din168_by_name("GL45");
 din168_cap(gl, ribs=36);              // a cap, seated at z = 0: place it at the rim
-din168_cap(gl, skirt=true);           // with a skirt below the thread; or skirt=<mm>
+din168_cap(gl, ring_band=5);          // with a band at the mouth that clears a pouring ring
 din168_nut(gl, length=12);            // the cap's thread alone, as a tube
 din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 ```
@@ -16,6 +16,10 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
 - **Sizes:** every size in DIN 168-1:1998-04, GL8 to GL125, including GL25 in both its pitches
   (`din168_by_name("GL25", pitch=3.5)` for the second). Every figure in the table is recorded with
   its source in [docs/references.md](docs/references.md).
+- **GLS 80:** `din168_by_name("GLS80")`, the thread on DURAN's wide-mouth bottles. It is not a
+  DIN 168 thread and no standard defines it: three starts, crests 5 mm apart, 15 mm of advance per
+  turn, which DWK and b.safe publish. Its diameters and tooth are GL80's, which a measured
+  third-party GLS 80 cap agrees with. A DIN GL80 cap does not fit a GLS 80 neck.
 - **Profile:** Bild 1 of the standard: flanks at 60° on the glass and 30° in the cap, crests rounded
   to R1 and roots to R2, the glass tooth `b = P·k` wide at its core. The standard gives no width for
   the cap tooth; it follows from the cap's crest radius and flank angle (see `din168.scad`).
@@ -24,13 +28,15 @@ din168_bolt(gl, length=12, bore=30);  // the glass side, for a gauge
   every face. Centred on the largest glass the standard allows, the default cap leaves 0.28 mm
   (P = 2) to 0.70 mm (P = 5) at the closest point.
 - **Cap height:** no standard sets it. DIN 168-1 gives only the thread, and ISO 4796-1 leaves the
-  bottle's neck to the maker. The default cap is 17 mm: 12 mm of thread, 2 mm over the rim for a
-  liner, a 3 mm top. Shop-bought caps are taller and carry a skirt, plain wall below the thread
-  that covers the neck. `skirt=true` adds one pitch of it (4 mm on GL45), a choice;
-  `skirt=<mm>` sets your own.
+  bottle's neck to the maker. The cap is threaded from 2 mm under the top, where a liner sits, to
+  the mouth: five pitches by default (`thread_length`), so 25 mm over all on GL45, the height of
+  DURAN's PP GL45 cap. The thread has to reach the neck's, which starts some way below the rim.
+- **Pouring rings:** `ring_band` adds a band at the mouth, bored 2 mm outside the thread's root,
+  for a neck with a pouring ring fitted. DURAN's rings are 4 mm tall on GL32 and GL45 and 6.85 mm
+  on GLS 80, so `ring_band=5` and `ring_band=8`.
 - **Placing a cap:** z = 0 is the seal plane, where the glass's rim meets the inside of the top.
   Translate a cap to a bottle's rim height and it sits on the rim, whatever its thread length,
-  liner space or skirt. The top runs from z = 0 to z = `top`.
+  liner space or ring band. The top runs from z = 0 to z = `top`.
 - **Rendering:** the thread is one polyhedron swept along a true helix. A full render of the GL45
   example takes over a minute on OpenSCAD 2021.01; preview is quick.
 
@@ -60,4 +66,5 @@ Diameters are nominal, in mm; the full table with allowances and radii is in
 
 - [examples/gl45_cap.scad](examples/gl45_cap.scad): a GL45 cap and a short gauge to try it on.
 - [examples/gl80_cap.scad](examples/gl80_cap.scad): the same for GL80, ribbed.
+- [examples/gls80_cap.scad](examples/gls80_cap.scad): the same for GLS 80.
 - [examples/all_sizes.scad](examples/all_sizes.scad): a cap in every size, labelled.
