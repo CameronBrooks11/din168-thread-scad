@@ -1,6 +1,7 @@
 /**
  * @file din168.scad
- * @brief DIN 168 round thread (GL laboratory glassware): size table, thread, and screw cap
+ * @brief DIN 168 round thread (GL laboratory glassware): size table, thread, and screw cap; also
+ *        DURAN's GLS 80, which is not a DIN 168 thread
  *
  * `use <din168-thread-scad/din168.scad>`. Draws nothing at top level; see examples/.
  *
@@ -40,6 +41,12 @@ din168_gl100 = ["GL100", 5.0, 100, 97, 100.4, 97.4, 1.2, 0.6, 1.1, 0.8, 0.6];
 din168_gl112 = ["GL112", 5.0, 112, 109, 112.4, 109.4, 1.2, 0.6, 1.1, 0.8, 0.6];
 din168_gl125 = ["GL125", 5.0, 125, 122, 125.4, 122.4, 1.2, 0.6, 1.1, 0.8, 0.6];
 
+// GLS 80, DURAN's wide-mouth thread. NOT DIN 168: three starts at 5 mm between crests, so it
+// advances 15 mm per turn (DWK, b.safe; docs/references.md). Its diameters and pitch are GL80's,
+// which a measured third-party GLS 80 cap agrees with; the tooth shape is GL80's. A row may carry a
+// twelfth field, the number of starts; without it a thread has one.
+din168_gls80 = ["GLS80", 5.0, 80, 77, 80.4, 77.4, 1.0, 0.6, 1.1, 0.8, 0.6, 3];
+
 // In the standard's order, so the first GL25 is P = 3.
 din168_sizes = [
   din168_gl8, din168_gl10, din168_gl12, din168_gl14, din168_gl16, din168_gl18, din168_gl20,
@@ -48,15 +55,17 @@ din168_sizes = [
   din168_gl100, din168_gl112, din168_gl125,
 ];
 
-// A size by name, e.g. "GL45". GL25 comes in two pitches: pitch=3.5 picks the other one.
+// A size by name, e.g. "GL45", or "GLS80". GL25 comes in two pitches: pitch=3.5 picks the other one.
 function din168_by_name(name, pitch = undef) =
   let (
-    found = [for (s = din168_sizes) if (s[0] == name && (is_undef(pitch) || s[1] == pitch)) s]
-  ) assert(len(found) > 0, str("din168_by_name: no DIN 168 size ", name, is_undef(pitch) ? "" : str(" x ", pitch)))
+    found = [for (s = concat(din168_sizes, [din168_gls80])) if (s[0] == name && (is_undef(pitch) || s[1] == pitch)) s]
+  ) assert(len(found) > 0, str("din168_by_name: no size ", name, is_undef(pitch) ? "" : str(" x ", pitch)))
   found[0];
 
 function din168_name(size) = size[0];
-function din168_pitch(size) = size[1];
+function din168_pitch(size) = size[1]; // between neighbouring crests
+function din168_starts(size) = len(size) > 11 ? size[11] : 1;
+function din168_lead(size) = din168_pitch(size) * din168_starts(size); // advance per turn
 function din168_bolt_outer(size) = [size[2] - size[6], size[2]]; // d, [min, max]
 function din168_bolt_core(size) = [size[3] - size[6], size[3]]; // d1
 function din168_nut_outer(size) = [size[4], size[4] + size[7]]; // D
@@ -146,11 +155,12 @@ function din168_crest_segments() = $preview ? 4 : 6;
 function din168_root_segments() = $preview ? 2 : 3;
 
 /**
- * One tooth swept along a helix: `turns` turns from z = 0, rising by the pitch per turn.
- * profile is [tip r, root r, tooth] (din168_nut_profile, din168_bolt_profile); the section is
- * extended past the root by din168_root_overlap, into the wall the tooth stands on.
+ * The thread's teeth swept along a helix: `turns` turns from z = 0. One tooth per start, `pitch`
+ * apart along the axis, each rising by pitch * starts per turn. profile is [tip r, root r, tooth]
+ * (din168_nut_profile, din168_bolt_profile); the section is extended past the root by
+ * din168_root_overlap, into the wall the tooth stands on.
  */
-module din168_helix(pitch, profile, turns) {
+module din168_helix(pitch, profile, turns, starts = 1) {
   _rt = profile[0];
   _rr = profile[1];
   _t = profile[2];
@@ -173,10 +183,11 @@ module din168_helix(pitch, profile, turns) {
   _sec = _s < 0 ? _sec0 : [for (i = [len(_sec0) - 1:-1:0]) _sec0[i]];
   _m = len(_sec);
   _n = ceil(turns * din168_steps_per_turn());
+  _lead = pitch * starts;
 
   _pts = [
     for (i = [0:_n])
-      let (a = i * 360 * turns / _n, dz = pitch * turns * i / _n)
+      let (a = i * 360 * turns / _n, dz = _lead * turns * i / _n)
         for (p = _sec) [p[0] * cos(a), p[0] * sin(a), p[1] + dz],
   ];
 
@@ -191,7 +202,8 @@ module din168_helix(pitch, profile, turns) {
     ]
   );
 
-  polyhedron(points=_pts, faces=_faces, convexity=4);
+  for (k = [0:starts - 1])
+    rotate([0, 0, k * 360 / starts]) polyhedron(points=_pts, faces=_faces, convexity=4);
 }
 
 /**
@@ -200,9 +212,9 @@ module din168_helix(pitch, profile, turns) {
  */
 module din168_nut(size, length, wall = 2, clearance = 0.2) {
   _p = din168_pitch(size);
+  _l = din168_lead(size);
   _prof = din168_nut_profile(size, clearance);
   _r_out = _prof[1] + wall;
-
 
   difference() {
     union() {
@@ -211,7 +223,7 @@ module din168_nut(size, length, wall = 2, clearance = 0.2) {
         translate([0, 0, -1]) din168_root_cylinder(length + 2, _prof[1], outside=true);
       }
       intersection() {
-        translate([0, 0, -_p]) din168_helix(_p, _prof, (length + 2 * _p) / _p);
+        translate([0, 0, -_l]) din168_helix(_p, _prof, (length + 2 * _l) / _l, din168_starts(size));
         cylinder(h=length, r=_r_out);
       }
     }
@@ -231,6 +243,7 @@ module din168_nut(size, length, wall = 2, clearance = 0.2) {
  */
 module din168_bolt(size, length, bore = 0, clearance = 0.2) {
   _p = din168_pitch(size);
+  _l = din168_lead(size);
   _prof = din168_bolt_profile(size, clearance);
 
   assert(bore / 2 < _prof[1] - 1, str("din168_bolt: a ", bore, " bore leaves under 1 mm under the thread"));
@@ -239,7 +252,7 @@ module din168_bolt(size, length, bore = 0, clearance = 0.2) {
     union() {
       din168_root_cylinder(length, _prof[1], outside=false);
       intersection() {
-        translate([0, 0, -_p]) din168_helix(_p, _prof, (length + 2 * _p) / _p);
+        translate([0, 0, -_l]) din168_helix(_p, _prof, (length + 2 * _l) / _l, din168_starts(size));
         // Past the crest: this only trims the ends, and a faceted cylinder at the crest would cut it
         cylinder(h=length, r=_prof[0] + 1);
       }
@@ -251,68 +264,75 @@ module din168_bolt(size, length, bore = 0, clearance = 0.2) {
 /**
  * A screw cap: the nut, closed by a top. z = 0 is the seal plane, where the glass's rim meets the
  * inside of the top, so a cap placed at a bottle's rim height sits on it whatever its arguments.
- * The top is above it, from z = 0 to z = top; the liner space, thread and skirt hang below. The
- * outside is plain, or ribbed for grip.
+ * The top is above it, from z = 0 to z = top; the liner space and the thread hang below, the
+ * thread running down to the mouth. The outside is plain, or ribbed for grip.
  *
- * skirt is plain wall below the thread, reaching down the neck as a shop-bought cap does: false for
- * none, true for din168_default_skirt, or a length in mm. Its bore clears the glass's thread.
+ * thread_length defaults to din168_default_thread_length. ring_band, in mm, adds a band at the
+ * mouth bored din168_ring_band_gap outside the thread's root, to clear a pouring ring on the neck;
+ * the wall steps out over it. 0 for none.
  *
- * CHOICE, not from the standard: thread length, wall, top and liner space are defaults to test
- * against a real bottle and change.
+ * CHOICE, not from the standard: thread length, wall, top, liner space and the ring band are
+ * defaults to test against a real bottle and change.
  */
 module din168_cap(
   size,
-  thread_length = 12,
+  thread_length = undef,
   liner_space = 2,
   top = 3,
   wall = 2,
   clearance = 0.2,
   ribs = 0,
-  skirt = false
+  ring_band = 0
 ) {
   _prof = din168_nut_profile(size, clearance);
   _r_out = _prof[1] + wall;
-  _s = din168_skirt_length(size, skirt);
-  _h_in = _s + thread_length + liner_space;
+  _tl = is_undef(thread_length) ? din168_default_thread_length(size) : thread_length;
+  _h_in = ring_band + _tl + liner_space;
+  _r_band = _prof[1] + din168_ring_band_gap;
+
+  assert(ring_band >= 0, str("din168_cap: ring_band must be >= 0, not ", ring_band));
 
   translate([0, 0, -_h_in]) {
-    if (_s > 0)
+    // A wall stepped out round the band, and bored clear of the ring. The bore stops 0.005 mm short
+    // of the thread's wall and the band runs 0.01 mm into it, so the wall's end face lies inside
+    // the band rather than level with the bore's, whose edge can share its radius.
+    if (ring_band > 0)
       difference() {
-        cylinder(h=_s + 0.01, r=_r_out);
-        translate([0, 0, -1]) din168_root_cylinder(_s + 1.02, _prof[1], outside=true);
+        cylinder(h=ring_band + 0.01, r=_r_band + wall);
+        translate([0, 0, -1]) cylinder(h=ring_band + 1 - 0.005, r=_r_band, $fn=din168_steps_per_turn());
+        translate([0, 0, -0.5]) din168_root_cylinder(ring_band + 1.02, _prof[1], outside=true);
       }
 
-    translate([0, 0, _s]) {
-      din168_nut(size, thread_length, wall, clearance);
+    translate([0, 0, ring_band]) {
+      din168_nut(size, _tl, wall, clearance);
 
       // Plain wall over the liner space, then the top
-      translate([0, 0, thread_length - 0.01])
+      translate([0, 0, _tl - 0.01])
         difference() {
           cylinder(h=liner_space + top + 0.01, r=_r_out);
           translate([0, 0, -1]) din168_root_cylinder(liner_space + 1.01, _prof[1], outside=true);
         }
-    }
 
-    // Half-round ribs for grip
-    if (ribs > 0)
-      for (i = [0:ribs - 1])
-        rotate([0, 0, i * 360 / ribs])
-          translate([_r_out, 0, 0])
-            cylinder(h=_h_in + top, r=wall / 2, $fn=8);
+      // Half-round ribs for grip, above the band. Over a band they start inside the band's overlap
+      // with the thread's wall, clear of both its faces.
+      _z_rib = ring_band > 0 ? 0.005 : 0;
+      if (ribs > 0)
+        for (i = [0:ribs - 1])
+          rotate([0, 0, i * 360 / ribs])
+            translate([_r_out, 0, _z_rib])
+              cylinder(h=_tl + liner_space + top - _z_rib, r=wall / 2, $fn=8);
+    }
   }
 }
 
-// What skirt = true gives: one pitch. CHOICE: no standard gives the neck's length below the
-// thread (DIN 168-1 gives only the thread; ISO 4796-1 leaves the neck to the maker), and one pitch
-// stays short of the shoulder.
-function din168_default_skirt(size) = din168_pitch(size);
+// Five pitches of thread. CHOICE: no standard gives a cap's thread length. DURAN's GL caps are 17
+// to 28 mm tall (docs/references.md); less a 3 mm top, that is 5.25 to 6.67 pitches inside. The GL45
+// cap this gives is 25 mm over all, DURAN's PP GL45 cap's height. On GLS 80 it is 25 mm.
+function din168_default_thread_length(size) = 5 * din168_pitch(size);
 
-// A cap's skirt in mm, from din168_cap's skirt argument.
-function din168_skirt_length(size, skirt) =
-  skirt == true ? din168_default_skirt(size)
-  : skirt == false ? 0
-  : assert(is_num(skirt) && skirt >= 0, str("din168_cap: skirt must be true, false or a length >= 0, not ", skirt))
-    skirt;
+// How far the ring band's bore stands outside the thread's root. CHOICE: what a measured
+// third-party GLS 80 cap leaves (docs/references.md); DURAN gives its pouring rings' heights only.
+din168_ring_band_gap = 2;
 
 // Outside radius of a cap, so a caller can size what it puts on the top.
 function din168_cap_radius(size, wall = 2, clearance = 0.2) = din168_nut_profile(size, clearance)[1] + wall;

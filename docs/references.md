@@ -81,6 +81,64 @@ three of their cells are wrong; everything else matches:
 
 The web tables give no profile: no R1, R2 or k.
 
+## DURAN caps and pouring rings (DWK Life Sciences)
+
+DWK's order sheets, read 2026-10-03:
+
+- _DURAN® Bottle Caps & Connections & Accessories_:
+  <https://www.duran-bottle-system.com/files/Downloads/order_info_caps_closure/DURAN_BottleCaps-Connections-Accessories_EN.pdf>
+- _DURAN® GLS 80® Bottle Caps & Connections & Accessories_:
+  <https://www.duran-bottle-system.com/files/Downloads/order_info_caps_closure/DURAN_GLS80_BottleCaps-Connections-Accessories_EN.pdf>
+
+Screw cap heights h, mm, with outside diameter d in brackets:
+
+| Cap                                  | GL14   | GL18   | GL25   | GL32   | GL45   | GLS 80   |
+| ------------------------------------ | ------ | ------ | ------ | ------ | ------ | -------- |
+| Original GL screw cap, PP, lip seal  |        |        | 19 (33)| 24 (40)| 25 (54)|          |
+| Red high-temperature screw cap, PBT  | 17 (20)| 20 (23)| 23 (33)| 26 (41)| 28 (54)|          |
+| GLS 80 quick-release screw cap, PP   |        |        |        |        |        | 40 (87)  |
+| GLS 80 high-temperature cap, PSU     |        |        |        |        |        | 40 (88.5)|
+
+Pouring rings are 4 mm tall for GL32 and GL45, and 6.85 mm for GLS 80. The sheets give no ring
+diameters. The GLS 80 sheet says the cap opens and closes "with only a three-quarter turn".
+
+The cap's default thread length rests on the GL rows: less a 3 mm top, these caps are 5.25 to 6.67
+pitches deep inside. Five pitches makes the GL45 cap 25 mm, the PP cap's height.
+
+## GLS 80
+
+No standard defines GLS 80, and no source found gives its profile. What is published:
+
+- b.safe, _Flaschengewinde einfach bestimmen_ (bottle thread identification), read 2026-10-03:
+  <https://www.bsafe.de/Technische-Informationen/Gewindearten-Bestimmung/Flaschengewinde/>. Its
+  text gives "GL-Gewinde eingängig, GLS 80-Gewinde dreigängig" (GL single-start, GLS 80
+  three-start), and its table gives GLS 80 an outside diameter of 80.0 mm and a Steigung (lead) of
+  15.0 mm. Three starts at a 15 mm lead put the crests 5 mm apart, GL80's pitch.
+- DWK, above: a three-quarter turn to open, and the caps' sizes.
+
+For the rest, a third-party cap was measured: _Cap for Schott bottle with GLS 80 thread_ by
+CAD-Guy, <https://www.printables.com/model/246479-cap-for-schott-bottle-with-gls-80-thread>,
+CC BY-NC-SA 4.0. Its author's model, not a DWK drawing; measured 2026-10-04 by sectioning and
+ray-casting `Verschluss-Schottflasche.stl` (366 040 triangles). Nothing from it is copied into
+the library. Measured, mm:
+
+| Quantity                                   | Reference cap      | Library's GLS 80 cap        |
+| ------------------------------------------ | ------------------ | --------------------------- |
+| starts, lead                               | 3, 15 (crests move 1.25 mm per 30°, pattern repeats every 120°) | 3, 15  |
+| crest spacing                              | 5.0                | 5 (GL80's P)                |
+| bore at the crests                         | 77.8               | 78.4 (GL80's D1 max + 2 × 0.2) |
+| bore at the root                           | 80.8               | 81.4 (GL80's D max + 2 × 0.2)  |
+| tooth                                      | arc, radius 1.25, 1.5 deep | GL80's cap tooth (Bild 1), 1.5 deep |
+| threaded length                            | about 22, then 2 of run-out | 25 (five pitches)  |
+| plain band between thread and top          | 2, bored 77.0      | 2 (liner space)             |
+| band at the mouth                          | 8 deep, bored 84.8 | optional, `ring_band`, bored 2 outside the root |
+| height over all                            | 40                 | 30 without a ring band      |
+
+The reference's bore diameters fall inside DIN 168's GL80 cap limits (D1 77.4 to 78.0, D 80.4 to
+81.0), so the library takes GL80's diameters and tooth for GLS 80 rather than the reference's
+round tooth, which is the author's approximation. Its mouth band, 2 mm outside the root, is the
+library's `din168_ring_band_gap`.
+
 ## modelscad.com
 
 An earlier GL thread model, `gl_threads.scad`, gives <https://modelscad.com/thread/thread-page26-eng>
