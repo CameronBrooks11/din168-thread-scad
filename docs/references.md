@@ -139,6 +139,17 @@ The reference's bore diameters fall inside DIN 168's GL80 cap limits (D1 77.4 to
 round tooth, which is the author's approximation. Its mouth band, 2 mm outside the root, is the
 library's `din168_ring_band_gap`.
 
+## Test prints
+
+Caps printed from 7ea65c3 (the cap alone from `examples/gl45_cap.scad` and
+`examples/gls80_cap.scad`, top on the bed) and tried on DURAN bottles, 2026-10-05:
+
+| Cap                                         | Bottle       | Result                                              |
+| ------------------------------------------- | ------------ | --------------------------------------------------- |
+| GL45, 25 mm, 20 mm of thread                | DURAN GL45   | Threads on cleanly and seats fully, more cleanly than the 12 mm thread it replaced. |
+| GLS 80, 30 mm, 25 mm of three-start thread  | DURAN GLS 80 | Fits. Without a gasket it is not watertight: it needs a seal in the liner space. |
+| GL80 (DIN 168, single start), before GLS 80 | DURAN GLS 80 | Caught for a fraction of a turn and came off.       |
+
 ## modelscad.com
 
 An earlier GL thread model, `gl_threads.scad`, gives <https://modelscad.com/thread/thread-page26-eng>
