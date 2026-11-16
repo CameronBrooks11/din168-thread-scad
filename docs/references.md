@@ -1,3 +1,8 @@
+---
+title: References
+nav_order: 2
+---
+
 # References
 
 Every number the library takes from outside is recorded here with its source. A value in the code
