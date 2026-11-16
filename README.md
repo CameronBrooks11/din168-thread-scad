@@ -71,6 +71,28 @@ Diameters are nominal, in mm; the full table with allowances and radii is in
 - [examples/gls80_cap.scad](examples/gls80_cap.scad): the same for GLS 80.
 - [examples/all_sizes.scad](examples/all_sizes.scad): a cap in every size, labelled.
 
+## Consumers
+
+- [iso4796-bottle-scad](https://github.com/CameronBrooks11/iso4796-bottle-scad) draws its bottles'
+  threads with `din168_by_name`, `din168_bolt`, `din168_bolt_core` and `din168_pitch`, and checks
+  its own neck finishes against this table.
+- [uwo-fast/open-source-bioreactor](https://github.com/uwo-fast/open-source-bioreactor) makes its GL45
+  port caps with `din168_by_name`, `din168_cap` and `din168_cap_radius`
+  (`scad/custom/gl_port_cap.scad`).
+
+Both pin this library with scadman, so a change here reaches them only when they move their pin.
+To try a change against one before that, put a directory holding a link to this checkout, named
+`din168-thread-scad`, ahead of the consumer's own copy:
+
+```sh
+mkdir -p /tmp/din168-try && ln -s "$PWD" /tmp/din168-try/din168-thread-scad
+cd ../iso4796-bottle-scad && scadman sync
+OPENSCADPATH="/tmp/din168-try:$(scadman env)" python3 tests/test_iso4796.py
+```
+
+OpenSCAD takes the first match on `OPENSCADPATH`, so the link wins; without it the consumer
+renders against its pinned copy and the check says nothing about the change.
+
 ## Checks
 
 `just test` takes about 11 s on OpenSCAD 2026.10.15, with warnings treated as errors:
