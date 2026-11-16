@@ -3,6 +3,8 @@
 DIN 168 round threads (the GL threads on laboratory glassware) in OpenSCAD: a size table, the
 internal and external thread, and a screw cap. Also DURAN's GLS 80, which is not DIN 168.
 
+![A ribbed GL45 cap, mouth up, and a short GL45 gauge to try it on](docs/img/gl45-cap.png)
+
 ```openscad
 use <din168-thread-scad/din168.scad>
 
@@ -68,3 +70,21 @@ Diameters are nominal, in mm; the full table with allowances and radii is in
 - [examples/gl80_cap.scad](examples/gl80_cap.scad): the same for GL80, ribbed.
 - [examples/gls80_cap.scad](examples/gls80_cap.scad): the same for GLS 80.
 - [examples/all_sizes.scad](examples/all_sizes.scad): a cap in every size, labelled.
+
+## Checks
+
+`just test` takes about 11 s on OpenSCAD 2026.10.15, with warnings treated as errors:
+
+- Every row of `din168_sizes` matches Tabelle 1 as [docs/references.md](docs/references.md)
+  records it, cell by cell, and GLS 80 is GL80's row with three starts.
+- Every example renders.
+- A cap comes out one solid, as tall as its top, liner space, thread and any ring band add up to,
+  and as wide as `din168_cap_radius` says, ribs aside.
+- `din168_by_name` refuses a size or pitch it doesn't have, and `din168_cap` a negative ring band,
+  each with its message.
+
+The checks don't screw a cap onto a gauge: as drawn, the two threads start at different angles, so
+whether they clear each other depends on turning one into phase. The fit figures above come from
+the profile, and the test prints are recorded in [docs/references.md](docs/references.md).
+
+`just images` renders the picture above.
