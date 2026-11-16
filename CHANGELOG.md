@@ -5,8 +5,13 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-15
+
 ### Added
 
+- `just test`: the size table against `docs/references.md`, the examples and caps rendered, and
+  the refusals.
+- A docs site, at <https://cameronbrooks11.github.io/din168-thread-scad/>.
 - Every size in DIN 168-1:1998-04: GL8 to GL125, 24 in all, including GL25 × 3.5.
 - `din168_by_name(name, pitch)`: the optional `pitch` picks GL25 × 3.5.
 - `din168_r1` and `din168_r2`: the standard's crest and root radii.
@@ -51,3 +56,6 @@ All notable changes to this project are recorded here. The format follows
   up to r·(1 − cos 6°): 0.13 mm on GL45, 0.22 mm on GL80.
 - `din168_bolt` trimmed its ends with a cylinder at the crest radius, whose flats cut the crests by
   the same amount.
+
+[Unreleased]: https://github.com/CameronBrooks11/din168-thread-scad/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/CameronBrooks11/din168-thread-scad/releases/tag/v0.1.0
