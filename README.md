@@ -109,4 +109,5 @@ The checks don't screw a cap onto a gauge: as drawn, the two threads start at di
 whether they clear each other depends on turning one into phase. The fit figures above come from
 the profile, and the test prints are recorded in [docs/references.md](docs/references.md).
 
-`just images` renders the picture above.
+`just check` checks the `.scad` files are formatted with [topiary](https://github.com/tweag/topiary)
+0.8.0; `just fmt` formats them. `just images` renders the picture above.
